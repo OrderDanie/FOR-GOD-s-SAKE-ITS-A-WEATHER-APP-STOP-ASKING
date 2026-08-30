@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather - Real Time Weather App</title>
+    <meta name="theme-color" content="#1e3c72">
+    <meta name="description" content="A simple, beautiful weather app. No API keys, no tracking, just weather.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>Weather</h1>
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search city..." 
+                    autocomplete="off"
+                >
+                <button id="searchBtn">watch u looking for?</button>
+                <button id="locationBtn" class="location-btn" title="Use your location (L)">📍</button>
+                <button id="unitToggle" class="unit-btn" title="Toggle °C/°F (U)">°C</button>
+                <button id="themeToggle" class="theme-btn" title="Toggle dark/light mode (D)">🌙</button>
+                <button id="shareBtn" class="share-btn" title="Share weather (S)">📤</button>
+            </div>
+            <div id="suggestions" class="suggestions"></div>
+        </header>
+
+        <!-- the stuff u see -->
+        <main>
+            <div class="current-weather" id="currentWeather">
+                <div class="location-info">
+                    <h2 id="locationName">JUST WAIT BRUH</h2>
+                    <p id="currentTime"></p>
+                    <p id="lastUpdated" class="last-updated">--</p>
+                </div>
+                <div class="weather-main">
+                    <div class="temperature">
+                        <span id="temperature" class="temp-value">--</span>
+                        <span class="temp-unit">°C</span>
+                    </div>
+                    <div class="weather-description">
+                        <div id="weatherIcon" class="weather-icon"></div>
+                        <div>
+                            <p id="weatherDesc">--</p>
+                            <p id="tempRange" class="temp-range">--</p>
+                        </div>
+                    </div>
+                    <div class="day-score">
+                        <div class="score-label">Day Vibe</div>
+                        <div class="score-bar">
+                            <div class="score-fill" id="scoreBar"></div>
+                        </div>
+                        <div class="score-text" id="scoreText">--/10</div>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="detail">
+                        <span class="detail-label">I think it feels Like</span>
+                        <span id="feelsLike" class="detail-value">--°C</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Humidity</span>
+                        <span id="humidity" class="detail-value">--%</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Wind Speed</span>
+                        <span id="windSpeed" class="detail-value">-- km/h</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Wind Direction</span>
+                        <span id="windDirection" class="detail-value">--</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Pressure</span>
+                        <span id="pressure" class="detail-value">-- hPa</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Cloud Coverage</span>
+                        <span id="cloudCover" class="detail-value">--%</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">UV Index</span>
+                        <span id="uvIndex" class="detail-value">--</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Render distance</span>
+                        <span id="visibility" class="detail-value">-- km</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Rain chance</span>
+                        <span id="rainChance" class="detail-value">--%</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Sunrise</span>
+                        <span id="sunrise" class="detail-value">--:--</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Sunset</span>
+                        <span id="sunset" class="detail-value">--:--</span>
+                    </div>
+                    <div class="detail">
+                        <span class="detail-label">Dew Point</span>
+                        <span id="dewPoint" class="detail-value">--°C</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Moon Phase & Sun Position -->
+            <section class="forecast-section" id="astroSection">
+                <h3>🌙 Moon & Sun</h3>
+                <div class="astro-grid">
+                    <div class="astro-card">
+                        <div class="astro-icon" id="moonIcon">🌑</div>
+                        <div class="astro-info">
+                            <div class="astro-label">Moon Phase</div>
+                            <div class="astro-value" id="moonPhase">--</div>
+                            <div class="astro-detail" id="moonIllumination">--% illuminated</div>
+                        </div>
+                    </div>
+                    <div class="astro-card">
+                        <div class="astro-icon">🌅</div>
+                        <div class="astro-info">
+                            <div class="astro-label">Golden Hour</div>
+                            <div class="astro-value" id="goldenHour">--</div>
+                            <div class="astro-detail" id="goldenHourDetail">morning / evening</div>
+                        </div>
+                    </div>
+                    <div class="astro-card">
+                        <div class="astro-icon">☀️</div>
+                        <div class="astro-info">
+                            <div class="astro-label">Solar Noon</div>
+                            <div class="astro-value" id="solarNoon">--:--</div>
+                            <div class="astro-detail" id="dayLength">--h --m daylight</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Air Quality -->
+            <section class="forecast-section" id="airQualitySection">
+                <h3>💨 Air Quality</h3>
+                <div class="aqi-grid">
+                    <div class="aqi-main">
+                        <div class="aqi-value" id="aqiValue">--</div>
+                        <div class="aqi-label" id="aqiLabel">Loading...</div>
+                        <div class="aqi-bar">
+                            <div class="aqi-fill" id="aqiFill"></div>
+                        </div>
+                    </div>
+                    <div class="aqi-pollutants" id="aqiPollutants">
+                        <!-- Pollutants will be inserted here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Weather Comparison -->
+            <section class="forecast-section" id="comparisonSection">
+                <h3>📊 Today vs Average</h3>
+                <div class="comparison-grid" id="comparisonGrid">
+                    <!-- Comparison cards will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Fun Weather Fact -->
+            <section class="forecast-section" id="funFactSection">
+                <h3>🧠 Did You Know?</h3>
+                <div class="fun-fact" id="funFact">
+                    <p>Loading a random weather fact...</p>
+                </div>
+            </section>
+
+            <!-- Loading indicator -->
+            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>fetching weather...</p>
+            </div>
+
+            <section class="forecast-section">
+                <h3> Next 24 Hours</h3>
+                <div class="hourly-forecast" id="hourlyForecast">
+                </div>
+            </section>
+
+            <section class="forecast-section">
+                <h3> 7-Day Forecast</h3>
+                <div class="daily-forecast" id="dailyForecast">
+                </div>
+            </section>
+
+            <!-- Favorites / Saved locations -->
+            <section class="forecast-section">
+                <div class="section-header">
+                    <h3>⭐ Saved Spots</h3>
+                    <button id="addFavoriteBtn" class="add-fav-btn" title="Save current location">+</button>
+                </div>
+                <div class="favorites-list" id="favoritesList">
+                </div>
+            </section>
+
+            <section class="forecast-section">
+                <h3>💡 Quick Tips</h3>
+                <div class="tips-container" id="tipsContainer">
+                </div>
+            </section>
+            <div id="alertsContainer" class="alerts-container"></div>
+        </main>
+
+        <footer>
+            <p>Still just a weather app • No API key required • Always free</p>
+            <p class="shortcuts-hint">shortcuts: / search • l location • u units • r refresh • f first fav</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
