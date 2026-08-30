@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Weather App
 
 just a weather app. nothing fancy, nothing corporate. it works.
@@ -55,3 +56,6 @@ public domain. do whatever. copy it, change it, sell it, put your name on it, i 
 
 open index.html. check the weather. go outside.
 oh yea this if you are from stardance, um this is an old version i had of the project, the curent build isnt open sourced, yet,sooo maybe check it out here, no ads dw, https://atlasicweather.netlify.app/ 
+=======
+what?
+>>>>>>> a11c5f491a8cd3e6fb0fbc9e4f88b9c5b7613eb9

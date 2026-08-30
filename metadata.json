@@ -1,0 +1,7 @@
+{
+  "name": "Atlas Glass Weather",
+  "description": "A premium, glassy-UI weather application tailored for Morocco with real-time forecast data.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
