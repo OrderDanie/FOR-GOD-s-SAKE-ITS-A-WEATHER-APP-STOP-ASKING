@@ -1,297 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-<<<<<<< HEAD
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather - Real Time Weather App</title>
-    <meta name="theme-color" content="#1e3c72">
-    <meta name="description" content="A simple, beautiful weather app. No API keys, no tracking, just weather.">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Weather</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header>
-            <h1>Weather</h1>
-            <div class="search-box">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Search city..." 
-                    autocomplete="off"
-                >
-                <button id="searchBtn">watch u looking for?</button>
-                <button id="locationBtn" class="location-btn" title="Use your location (L)">📍</button>
-                <button id="unitToggle" class="unit-btn" title="Toggle °C/°F (U)">°C</button>
-                <button id="themeToggle" class="theme-btn" title="Toggle dark/light mode (D)">🌙</button>
-                <button id="shareBtn" class="share-btn" title="Share weather (S)">📤</button>
+    <div class="viewport">
+        <header class="navbar">
+            <div class="navbar-brand">
+                <h1>weather</h1>
             </div>
-            <div id="suggestions" class="suggestions"></div>
+            <div class="navbar-controls">
+                <button class="btn-control" id="btnTheme" aria-label="theme">theme</button>
+                <button class="btn-control" id="btnUnit" aria-label="unit">C</button>
+            </div>
         </header>
 
-        <!-- the stuff u see -->
-        <main>
-            <div class="current-weather" id="currentWeather">
-                <div class="location-info">
-                    <h2 id="locationName">JUST WAIT BRUH</h2>
-                    <p id="currentTime"></p>
-                    <p id="lastUpdated" class="last-updated">--</p>
+        <main class="content">
+            <section class="search-area">
+                <div class="search-field">
+                    <input 
+                        type="text" 
+                        id="inputSearch" 
+                        placeholder="find a place..." 
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
                 </div>
-                <div class="weather-main">
-                    <div class="temperature">
-                        <span id="temperature" class="temp-value">--</span>
-                        <span class="temp-unit">°C</span>
-                    </div>
-                    <div class="weather-description">
-                        <div id="weatherIcon" class="weather-icon"></div>
-                        <div>
-                            <p id="weatherDesc">--</p>
-                            <p id="tempRange" class="temp-range">--</p>
-                        </div>
-                    </div>
-                    <div class="day-score">
-                        <div class="score-label">Day Vibe</div>
-                        <div class="score-bar">
-                            <div class="score-fill" id="scoreBar"></div>
-                        </div>
-                        <div class="score-text" id="scoreText">--/10</div>
-                    </div>
-                </div>
-                <div class="weather-details">
-                    <div class="detail">
-                        <span class="detail-label">I think it feels Like</span>
-                        <span id="feelsLike" class="detail-value">--°C</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Humidity</span>
-                        <span id="humidity" class="detail-value">--%</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Wind Speed</span>
-                        <span id="windSpeed" class="detail-value">-- km/h</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Wind Direction</span>
-                        <span id="windDirection" class="detail-value">--</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Pressure</span>
-                        <span id="pressure" class="detail-value">-- hPa</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Cloud Coverage</span>
-                        <span id="cloudCover" class="detail-value">--%</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">UV Index</span>
-                        <span id="uvIndex" class="detail-value">--</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Render distance</span>
-                        <span id="visibility" class="detail-value">-- km</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Rain chance</span>
-                        <span id="rainChance" class="detail-value">--%</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Sunrise</span>
-                        <span id="sunrise" class="detail-value">--:--</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Sunset</span>
-                        <span id="sunset" class="detail-value">--:--</span>
-                    </div>
-                    <div class="detail">
-                        <span class="detail-label">Dew Point</span>
-                        <span id="dewPoint" class="detail-value">--°C</span>
-                    </div>
-                </div>
-            </div>
+                <div id="dropdownSuggestions" class="suggestions-drop"></div>
+            </section>
 
-            <!-- Moon Phase & Sun Position -->
-            <section class="forecast-section" id="astroSection">
-                <h3>🌙 Moon & Sun</h3>
-                <div class="astro-grid">
-                    <div class="astro-card">
-                        <div class="astro-icon" id="moonIcon">🌑</div>
-                        <div class="astro-info">
-                            <div class="astro-label">Moon Phase</div>
-                            <div class="astro-value" id="moonPhase">--</div>
-                            <div class="astro-detail" id="moonIllumination">--% illuminated</div>
-                        </div>
+            <section id="sectionCurrent" class="weather-now">
+                <div class="location-header">
+                    <h2 id="txtLocation">loading...</h2>
+                    <span id="txtTime" class="time-now"></span>
+                </div>
+
+                <div class="temp-display">
+                    <div class="temp-main">
+                        <span id="valTemp" class="value">--</span>
+                        <span class="unit" id="unitLabel">C</span>
                     </div>
-                    <div class="astro-card">
-                        <div class="astro-icon">🌅</div>
-                        <div class="astro-info">
-                            <div class="astro-label">Golden Hour</div>
-                            <div class="astro-value" id="goldenHour">--</div>
-                            <div class="astro-detail" id="goldenHourDetail">morning / evening</div>
-                        </div>
-                    </div>
-                    <div class="astro-card">
-                        <div class="astro-icon">☀️</div>
-                        <div class="astro-info">
-                            <div class="astro-label">Solar Noon</div>
-                            <div class="astro-value" id="solarNoon">--:--</div>
-                            <div class="astro-detail" id="dayLength">--h --m daylight</div>
+                    <div class="condition-info">
+                        <div id="iconWeather" class="icon-box">--</div>
+                        <div class="text-info">
+                            <p id="txtCondition">--</p>
+                            <p id="txtRange" class="range">--</p>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Air Quality -->
-            <section class="forecast-section" id="airQualitySection">
-                <h3>💨 Air Quality</h3>
-                <div class="aqi-grid">
-                    <div class="aqi-main">
-                        <div class="aqi-value" id="aqiValue">--</div>
-                        <div class="aqi-label" id="aqiLabel">Loading...</div>
-                        <div class="aqi-bar">
-                            <div class="aqi-fill" id="aqiFill"></div>
-                        </div>
+                <div class="vibe-meter">
+                    <label>how's the day</label>
+                    <div class="meter-track">
+                        <div id="meterFill" class="meter-bar"></div>
                     </div>
-                    <div class="aqi-pollutants" id="aqiPollutants">
-                        <!-- Pollutants will be inserted here -->
+                    <span id="valVibe" class="meter-text">--/10</span>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-name">feels like</span>
+                        <span id="valFeels" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">humidity</span>
+                        <span id="valHumid" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">wind</span>
+                        <span id="valWind" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">direction</span>
+                        <span id="valDir" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">pressure</span>
+                        <span id="valPress" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">clouds</span>
+                        <span id="valCloud" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">uv index</span>
+                        <span id="valUv" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">visibility</span>
+                        <span id="valVis" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">rain chance</span>
+                        <span id="valRain" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">sunrise</span>
+                        <span id="valSunrise" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">sunset</span>
+                        <span id="valSunset" class="detail-num">--</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-name">dew point</span>
+                        <span id="valDew" class="detail-num">--</span>
                     </div>
                 </div>
             </section>
 
-            <!-- Weather Comparison -->
-            <section class="forecast-section" id="comparisonSection">
-                <h3>📊 Today vs Average</h3>
-                <div class="comparison-grid" id="comparisonGrid">
-                    <!-- Comparison cards will be inserted here -->
-                </div>
+            <section id="sectionHourly" class="forecast-hours">
+                <h3>next 24 hours</h3>
+                <div id="containerHours" class="hours-scroll"></div>
             </section>
 
-            <!-- Fun Weather Fact -->
-            <section class="forecast-section" id="funFactSection">
-                <h3>🧠 Did You Know?</h3>
-                <div class="fun-fact" id="funFact">
-                    <p>Loading a random weather fact...</p>
-                </div>
+            <section id="sectionDaily" class="forecast-days">
+                <h3>7 day forecast</h3>
+                <div id="containerDays" class="days-grid"></div>
             </section>
 
-            <!-- Loading indicator -->
-            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p>fetching weather...</p>
-            </div>
-
-            <section class="forecast-section">
-                <h3> Next 24 Hours</h3>
-                <div class="hourly-forecast" id="hourlyForecast">
-                </div>
-            </section>
-
-            <section class="forecast-section">
-                <h3> 7-Day Forecast</h3>
-                <div class="daily-forecast" id="dailyForecast">
-                </div>
-            </section>
-
-            <!-- Favorites / Saved locations -->
-            <section class="forecast-section">
-                <div class="section-header">
-                    <h3>⭐ Saved Spots</h3>
-                    <button id="addFavoriteBtn" class="add-fav-btn" title="Save current location">+</button>
-                </div>
-                <div class="favorites-list" id="favoritesList">
-                </div>
-            </section>
-
-            <section class="forecast-section">
-                <h3>💡 Quick Tips</h3>
-                <div class="tips-container" id="tipsContainer">
-                </div>
-            </section>
-            <div id="alertsContainer" class="alerts-container"></div>
+            <section id="sectionAlerts" class="alerts-box"></section>
         </main>
 
-        <footer>
-            <p>Still just a weather app • No API key required • Always free</p>
-            <p class="shortcuts-hint">shortcuts: / search • l location • u units • r refresh • f first fav</p>
+        <footer class="footer">
+            <p>no keys. no tracking. just weather.</p>
         </footer>
     </div>
 
     <script src="app.js"></script>
 </body>
 </html>
-=======
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Atlas Glass Weather</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              glass: {
-                100: 'rgba(255, 255, 255, 0.1)',
-                200: 'rgba(255, 255, 255, 0.2)',
-                300: 'rgba(255, 255, 255, 0.3)',
-                dark: 'rgba(0, 0, 0, 0.3)',
-              }
-            },
-            keyframes: {
-              shimmer: {
-                '100%': { transform: 'translateX(100%)' }
-              }
-            }
-          }
-        }
-      }
-    </script>
-    <style>
-      body {
-        margin: 0;
-        overflow-x: hidden;
-      }
-      /* Custom scrollbar for webkit */
-      ::-webkit-scrollbar {
-        width: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2); 
-        border-radius: 10px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.4); 
-      }
-    </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "recharts": "https://esm.sh/recharts@^3.7.0",
-    "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
-    "framer-motion": "https://esm.sh/framer-motion@^12.31.0",
-    "clsx": "https://esm.sh/clsx@^2.1.1",
-    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
-  <body class="bg-gray-900 text-white antialiased selection:bg-cyan-500 selection:text-white">
-    <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
-</html>
->>>>>>> a11c5f491a8cd3e6fb0fbc9e4f88b9c5b7613eb9
