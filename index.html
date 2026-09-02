@@ -1,135 +1,70 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather</title>
-    <link rel="stylesheet" href="styles.css">
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>THE weather</title>
+    <meta name="description" content="A clean, real-time meteorological observation and weather forecast system with live global news dispatches." />
+    <meta property="og:title" content="THE weather" />
+    <meta property="og:description" content="A clean, real-time meteorological observation and weather forecast system with live global news dispatches." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      /* Clean subtle scrollbar */
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(150, 150, 150, 0.2); 
+        border-radius: 9999px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(150, 150, 150, 0.4); 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.4/client",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@^3.4.0",
+    "framer-motion": "https://esm.sh/framer-motion@^12.31.0",
+    "clsx": "https://esm.sh/clsx@^2.1.1",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
 </head>
-<body>
-    <div class="viewport">
-        <header class="navbar">
-            <div class="navbar-brand">
-                <h1>weather</h1>
-            </div>
-            <div class="navbar-controls">
-                <button class="btn-control" id="btnTheme" aria-label="theme">theme</button>
-                <button class="btn-control" id="btnUnit" aria-label="unit">C</button>
-            </div>
-        </header>
-
-        <main class="content">
-            <section class="search-area">
-                <div class="search-field">
-                    <input 
-                        type="text" 
-                        id="inputSearch" 
-                        placeholder="find a place..." 
-                        autocomplete="off"
-                        spellcheck="false"
-                    >
-                </div>
-                <div id="dropdownSuggestions" class="suggestions-drop"></div>
-            </section>
-
-            <section id="sectionCurrent" class="weather-now">
-                <div class="location-header">
-                    <h2 id="txtLocation">loading...</h2>
-                    <span id="txtTime" class="time-now"></span>
-                </div>
-
-                <div class="temp-display">
-                    <div class="temp-main">
-                        <span id="valTemp" class="value">--</span>
-                        <span class="unit" id="unitLabel">C</span>
-                    </div>
-                    <div class="condition-info">
-                        <div id="iconWeather" class="icon-box">--</div>
-                        <div class="text-info">
-                            <p id="txtCondition">--</p>
-                            <p id="txtRange" class="range">--</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="vibe-meter">
-                    <label>how's the day</label>
-                    <div class="meter-track">
-                        <div id="meterFill" class="meter-bar"></div>
-                    </div>
-                    <span id="valVibe" class="meter-text">--/10</span>
-                </div>
-
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <span class="detail-name">feels like</span>
-                        <span id="valFeels" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">humidity</span>
-                        <span id="valHumid" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">wind</span>
-                        <span id="valWind" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">direction</span>
-                        <span id="valDir" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">pressure</span>
-                        <span id="valPress" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">clouds</span>
-                        <span id="valCloud" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">uv index</span>
-                        <span id="valUv" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">visibility</span>
-                        <span id="valVis" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">rain chance</span>
-                        <span id="valRain" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">sunrise</span>
-                        <span id="valSunrise" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">sunset</span>
-                        <span id="valSunset" class="detail-num">--</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="detail-name">dew point</span>
-                        <span id="valDew" class="detail-num">--</span>
-                    </div>
-                </div>
-            </section>
-
-            <section id="sectionHourly" class="forecast-hours">
-                <h3>next 24 hours</h3>
-                <div id="containerHours" class="hours-scroll"></div>
-            </section>
-
-            <section id="sectionDaily" class="forecast-days">
-                <h3>7 day forecast</h3>
-                <div id="containerDays" class="days-grid"></div>
-            </section>
-
-            <section id="sectionAlerts" class="alerts-box"></section>
-        </main>
-
-        <footer class="footer">
-            <p>no keys. no tracking. just weather.</p>
-        </footer>
-    </div>
-
-    <script src="app.js"></script>
+  <body class="bg-[#0d1117] text-zinc-100 antialiased selection:bg-sky-500 selection:text-white">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
 </body>
 </html>

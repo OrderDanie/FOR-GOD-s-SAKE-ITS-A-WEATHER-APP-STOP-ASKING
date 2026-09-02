@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { 
   Sun, 
   Cloud, 
@@ -7,119 +8,136 @@ import {
   CloudSnow, 
   Wind, 
   CloudFog, 
-  Moon,
-  CloudDrizzle,
+  Moon, 
   CloudSun
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface WeatherIconProps {
   condition: string;
   className?: string;
+  isNight?: boolean;
 }
 
-export const WeatherIcon: React.FC<WeatherIconProps> = ({ condition, className }) => {
-  const lowerCondition = condition.toLowerCase();
+export const WeatherIcon: React.FC<WeatherIconProps> = ({ condition, className = 'w-6 h-6', isNight = false }) => {
+  const lower = (condition || '').toLowerCase();
 
-  const iconVariants = {
-    hover: { scale: 1.1, rotate: 5 },
-    tap: { scale: 0.95 },
-  };
-
-  const sunAnimation = {
-    animate: { rotate: 360 },
-    transition: { repeat: Infinity, duration: 12, ease: "linear" }
-  };
-
-  const cloudAnimation = {
-    animate: { x: [-3, 3, -3] },
-    transition: { repeat: Infinity, duration: 4, ease: "easeInOut" }
-  };
-
-  const rainAnimation = {
-    animate: { y: [0, 3, 0] },
-    transition: { repeat: Infinity, duration: 1.5, ease: "easeInOut" }
-  };
-
-  const windAnimation = {
-    animate: { x: [-2, 5, -2] },
-    transition: { repeat: Infinity, duration: 1, ease: "easeInOut" }
-  };
-
-  const pulseAnimation = {
-    animate: { scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] },
-    transition: { repeat: Infinity, duration: 3, ease: "easeInOut" }
-  };
-
-  let IconComponent: React.ReactNode;
-
-  // Determine Icon and Animation based on condition
-  if (lowerCondition.includes('storm') || lowerCondition.includes('thunder')) {
-    IconComponent = (
-      <motion.div {...pulseAnimation} className="relative">
-         <CloudLightning className={className} />
+  if (lower.includes('thunder') || lower.includes('storm')) {
+    return (
+      <motion.div
+        animate={{ 
+          filter: ['drop-shadow(0 0 2px rgba(251, 191, 36, 0.4))', 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.9))', 'drop-shadow(0 0 2px rgba(251, 191, 36, 0.4))'],
+          scale: [1, 1.05, 1] 
+        }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center justify-center"
+      >
+        <CloudLightning className={`${className} text-amber-400`} strokeWidth={1.75} />
       </motion.div>
     );
-  } else if (lowerCondition.includes('rain') || lowerCondition.includes('shower')) {
-    IconComponent = (
-      <motion.div {...rainAnimation}>
-        <CloudRain className={className} />
+  }
+
+  if (lower.includes('rain') || lower.includes('shower') || lower.includes('drizzle')) {
+    return (
+      <motion.div
+        animate={{ y: [0, -2, 0] }}
+        transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center justify-center"
+      >
+        <CloudRain className={`${className} text-blue-400`} strokeWidth={1.75} />
       </motion.div>
     );
-  } else if (lowerCondition.includes('drizzle')) {
-    IconComponent = (
-      <motion.div {...rainAnimation}>
-        <CloudDrizzle className={className} />
+  }
+
+  if (lower.includes('snow') || lower.includes('ice') || lower.includes('hail') || lower.includes('freezing')) {
+    return (
+      <motion.div
+        animate={{ rotate: [-6, 6, -6], scale: [1, 1.04, 1] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center justify-center"
+      >
+        <CloudSnow className={`${className} text-cyan-300`} strokeWidth={1.75} />
       </motion.div>
     );
-  } else if (lowerCondition.includes('snow') || lowerCondition.includes('ice')) {
-    IconComponent = (
-      <motion.div animate={{ rotate: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}>
-        <CloudSnow className={className} />
+  }
+
+  if (lower.includes('fog') || lower.includes('mist') || lower.includes('rime')) {
+    return (
+      <motion.div
+        animate={{ x: [-2, 2, -2], opacity: [0.8, 1, 0.8] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center justify-center"
+      >
+        <CloudFog className={`${className} text-zinc-400`} strokeWidth={1.75} />
       </motion.div>
     );
-  } else if (lowerCondition.includes('wind')) {
-    IconComponent = (
-      <motion.div {...windAnimation}>
-        <Wind className={className} />
+  }
+
+  if (lower.includes('wind')) {
+    return (
+      <motion.div
+        animate={{ x: [-2, 3, -2] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center justify-center"
+      >
+        <Wind className={`${className} text-teal-400`} strokeWidth={1.75} />
       </motion.div>
     );
-  } else if (lowerCondition.includes('fog') || lowerCondition.includes('mist')) {
-    IconComponent = (
-      <motion.div animate={{ opacity: [0.5, 0.8, 0.5] }} transition={{ repeat: Infinity, duration: 5 }}>
-        <CloudFog className={className} />
+  }
+
+  if (lower.includes('partly') || lower.includes('mainly clear')) {
+    return (
+      <motion.div
+        animate={{ y: [0, -1.5, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center justify-center"
+      >
+        <CloudSun className={`${className} text-amber-300`} strokeWidth={1.75} />
       </motion.div>
     );
-  } else if (lowerCondition.includes('partly cloudy')) {
-    IconComponent = (
-       <div className="relative">
-         <motion.div className="absolute inset-0" {...sunAnimation} style={{ opacity: 0.5, scale: 0.8, x: 10, y: -5 }}>
-           <Sun className={className} />
-         </motion.div>
-         <motion.div {...cloudAnimation} className="relative z-10">
-           <Cloud className={className} />
-         </motion.div>
-       </div>
-    );
-  } else if (lowerCondition.includes('cloud') || lowerCondition.includes('overcast')) {
-    IconComponent = (
-      <motion.div {...cloudAnimation}>
-        <Cloud className={className} />
+  }
+
+  if (lower.includes('cloud') || lower.includes('overcast')) {
+    return (
+      <motion.div
+        animate={{ x: [-1.5, 1.5, -1.5] }}
+        transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+        className="inline-flex items-center justify-center"
+      >
+        <Cloud className={`${className} text-zinc-400`} strokeWidth={1.75} />
       </motion.div>
     );
-  } else if (lowerCondition.includes('clear') || lowerCondition.includes('sunny')) {
-    IconComponent = (
-      <motion.div {...sunAnimation}>
-        <Sun className={className} />
+  }
+
+  if (lower.includes('clear') || lower.includes('sunny')) {
+    if (isNight) {
+      return (
+        <motion.div
+          animate={{ rotate: [-4, 4, -4] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="inline-flex items-center justify-center"
+        >
+          <Moon className={`${className} text-indigo-300`} strokeWidth={1.75} />
+        </motion.div>
+      );
+    }
+    return (
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+        className="inline-flex items-center justify-center"
+      >
+        <Sun className={`${className} text-amber-500`} strokeWidth={1.75} />
       </motion.div>
     );
-  } else {
-    IconComponent = <Sun className={className} />;
   }
 
   return (
-    <div className="inline-block" title={condition}>
-      {IconComponent}
-    </div>
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+      className="inline-flex items-center justify-center"
+    >
+      <Sun className={`${className} text-amber-500`} strokeWidth={1.75} />
+    </motion.div>
   );
 };

@@ -1,111 +1,115 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { WeatherData } from '../types';
 import { GlassCard } from './GlassCard';
 import { WeatherIcon } from './WeatherIcon';
-import { Droplets, Wind, ThermometerSun, MapPin, SunMedium, Compass } from 'lucide-react';
-import { motion, animate, useMotionValue, useTransform } from 'framer-motion';
+import { MapPin, ArrowUp, ArrowDown, Info, Clock } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { formatTemperature } from '../constants';
 
 interface CurrentWeatherProps {
   data: WeatherData;
 }
 
-const AnimatedNumber = ({ value }: { value: number }) => {
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, Math.round);
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const animation = animate(count, value, { duration: 1.5, ease: "easeOut" });
-    return animation.stop;
-  }, [value, count]);
-
-  return <motion.span>{rounded}</motion.span>;
-};
-
 export const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
-  return (
-    <GlassCard className="p-8 w-full relative group">
-      {/* Background glow effect for visual depth */}
-      <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all duration-700"></div>
+  const { tempUnit } = useTheme();
+  const current = data.current;
 
-      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+  return (
+    <GlassCard className="p-6 md:p-8 w-full">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         
-        {/* Main Info */}
-        <div className="flex flex-col">
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 text-white/80 mb-1"
-          >
-            <MapPin size={18} />
-            <span className="text-lg font-medium tracking-wide">{data.city}, {data.country}</span>
-          </motion.div>
-          
-          <div className="flex items-center gap-4">
-            <h1 className="text-8xl md:text-9xl font-bold bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent tracking-tighter flex">
-              <AnimatedNumber value={data.current.temp_c} />°
-            </h1>
-            <div className="flex flex-col gap-2">
-              <WeatherIcon condition={data.current.condition_text} className="w-12 h-12 text-yellow-300" />
-              <span className="text-xl md:text-2xl font-light text-white/90">
-                {data.current.condition_text}
-              </span>
+        {/* Location & Primary Temperature */}
+        <div>
+          <div className="flex items-center gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-2">
+            <MapPin className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+            <span className="tracking-tight text-zinc-800 dark:text-zinc-200 font-semibold">{data.city}</span>
+            <span className="text-zinc-400 dark:text-zinc-600">•</span>
+            <span className="text-zinc-600 dark:text-zinc-400">{data.country}</span>
+            <span className="text-zinc-400 dark:text-zinc-600">•</span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-500 flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {current.last_updated}
+            </span>
+          </div>
+
+          <div className="flex items-baseline gap-4 mt-2">
+            <motion.div 
+              key={`${current.temp_c}-${tempUnit}`}
+              initial={{ opacity: 0, scale: 0.95, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="text-6xl md:text-7xl font-bold tracking-tighter text-zinc-900 dark:text-zinc-100 font-mono"
+            >
+              {formatTemperature(current.temp_c, tempUnit)}
+            </motion.div>
+
+            <div className="space-y-1.5">
+              <motion.div 
+                whileHover={{ scale: 1.04 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 text-zinc-800 dark:text-zinc-200 shadow-sm cursor-default"
+              >
+                <motion.div
+                  animate={{ y: [0, -2, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <WeatherIcon condition={current.condition_text} className="w-4 h-4" />
+                </motion.div>
+                <span>{current.condition_text}</span>
+              </motion.div>
+
+              <div className="flex items-center gap-3 text-xs text-zinc-600 dark:text-zinc-400 pl-1">
+                <span>Feels like {formatTemperature(current.feels_like_c, tempUnit)}</span>
+                <span>•</span>
+                <span className="flex items-center gap-0.5">
+                  <ArrowUp className="w-3 h-3 text-rose-500 dark:text-rose-400" />
+                  {formatTemperature(current.temp_max_today, tempUnit)}
+                </span>
+                <span className="flex items-center gap-0.5">
+                  <ArrowDown className="w-3 h-3 text-blue-500 dark:text-blue-400" />
+                  {formatTemperature(current.temp_min_today, tempUnit)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Details Grid */}
-        <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
+        {/* Quick Atmospheric Summary Badge */}
+        <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0">
           <motion.div 
-            whileHover={{ scale: 1.05 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm flex flex-col items-center justify-center gap-1 min-w-[100px]"
+            whileHover={{ scale: 1.02 }}
+            className="px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/40 flex items-center justify-between gap-4 text-xs transition-colors"
           >
-            <Droplets className="w-6 h-6 text-blue-300" />
-            <span className="text-sm text-white/60">Humidity</span>
-            <span className="text-lg font-semibold">{data.current.humidity}%</span>
+            <span className="text-zinc-500 dark:text-zinc-400">Atmosphere</span>
+            <span className="font-semibold text-zinc-800 dark:text-zinc-200">{current.condition_text}</span>
           </motion.div>
-
           <motion.div 
-            whileHover={{ scale: 1.05 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm flex flex-col items-center justify-center gap-1 min-w-[100px]"
+            whileHover={{ scale: 1.02 }}
+            className="px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/40 flex items-center justify-between gap-4 text-xs transition-colors"
           >
-            <Wind className="w-6 h-6 text-teal-300" />
-            <span className="text-sm text-white/60">Wind</span>
-            <span className="text-lg font-semibold">{data.current.wind_kph} <span className="text-xs">km/h</span></span>
-          </motion.div>
-
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm flex flex-col items-center justify-center gap-1 min-w-[100px]"
-          >
-            <ThermometerSun className="w-6 h-6 text-orange-300" />
-            <span className="text-sm text-white/60">Feels Like</span>
-            <span className="text-lg font-semibold"><AnimatedNumber value={data.current.feels_like_c} />°</span>
-          </motion.div>
-
-           <motion.div 
-            whileHover={{ scale: 1.05 }}
-            className="bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-sm flex flex-col items-center justify-center gap-1 min-w-[100px]"
-          >
-            <SunMedium className="w-6 h-6 text-yellow-300" />
-            <span className="text-sm text-white/60">UV Index</span>
-            <span className="text-lg font-semibold">{data.current.uv}</span>
+            <span className="text-zinc-500 dark:text-zinc-400">Precipitation Index</span>
+            <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+              {data.hourly[0]?.chance_of_rain ?? 0}%
+            </span>
           </motion.div>
         </div>
       </div>
 
-      {/* Daily Advisory */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="mt-8 bg-white/10 rounded-xl p-4 border border-white/10 flex gap-3 items-start"
-      >
-        <Compass className="w-5 h-5 text-cyan-300 shrink-0 mt-0.5" />
-        <p className="text-white/90 text-sm leading-relaxed font-light">
-          {data.weatherInsight || data.aiInsight}
-        </p>
-      </motion.div>
+      {/* Meteorological Advisory Note */}
+      {data.weatherInsight && (
+        <motion.div 
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.35 }}
+          className="mt-6 pt-5 border-t border-zinc-100 dark:border-zinc-800/60 flex items-start gap-3 text-sm"
+        >
+          <Info className="w-4 h-4 text-zinc-400 dark:text-zinc-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed text-zinc-700 dark:text-zinc-300 font-normal">
+            {data.weatherInsight}
+          </p>
+        </motion.div>
+      )}
     </GlassCard>
   );
 };

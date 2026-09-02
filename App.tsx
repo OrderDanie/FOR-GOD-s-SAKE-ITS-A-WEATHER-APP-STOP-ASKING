@@ -1,147 +1,283 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { fetchWeather } from './services/weatherService';
-import { WeatherData, AppTheme } from './types';
-import { THEMES } from './constants';
+import { fetchWeather, fetchWeatherByCoordinates } from './services/weatherService';
+import { fetchNewsArticles } from './services/newsService';
+import { WeatherData, NewsArticle } from './types';
+import { MOROCCO_CITIES } from './constants';
 import { SearchBar } from './components/SearchBar';
 import { CurrentWeather } from './components/CurrentWeather';
+import { WeatherStats } from './components/WeatherStats';
 import { ForecastList } from './components/ForecastList';
 import { ForecastChart } from './components/ForecastChart';
 import { HourlyForecast } from './components/HourlyForecast';
+import { NewsTicker } from './components/NewsTicker';
+import { WeatherNews } from './components/WeatherNews';
 import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { WeatherBackground } from './components/WeatherBackground';
-import { ThemeContext } from './context/ThemeContext';
-import { Loader2 } from 'lucide-react';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { CloudSun, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 
 const AppContent: React.FC = () => {
-  const [city, setCity] = useState<string>('Casablanca');
+  const [selectedCity, setSelectedCity] = useState<string>('Casablanca');
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [locating, setLocating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Access theme context
-  const { theme, isDarkMode } = React.useContext(ThemeContext)!;
+  // Live news state
+  const [tickerArticles, setTickerArticles] = useState<NewsArticle[]>([]);
+  const [newsLoading, setNewsLoading] = useState<boolean>(true);
+  const [activeNewsModal, setActiveNewsModal] = useState<NewsArticle | null>(null);
 
-  const handleSearch = async (searchCity: string) => {
+  const { isDarkMode } = useTheme();
+
+  const loadWeather = async (cityName: string) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchWeather(searchCity);
+      const data = await fetchWeather(cityName);
       setWeather(data);
-      setCity(searchCity);
-    } catch (err) {
-      setError("Unable to find weather data. Please try again.");
+      setSelectedCity(cityName);
+    } catch (err: any) {
+      setError(err?.message || "Unable to fetch meteorological data. Please check location name.");
     } finally {
       setLoading(false);
     }
   };
 
+  const loadInitialNews = async () => {
+    try {
+      setNewsLoading(true);
+      const news = await fetchNewsArticles('all');
+      setTickerArticles(news);
+    } catch (err) {
+      console.warn('Initial news wire fetch failed:', err);
+    } finally {
+      setNewsLoading(false);
+    }
+  };
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setLocating(true);
+    setError(null);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const data = await fetchWeatherByCoordinates(latitude, longitude);
+          setWeather(data);
+          setSelectedCity(data.city);
+        } catch (err: any) {
+          setError("Failed to retrieve weather for current location.");
+        } finally {
+          setLocating(false);
+        }
+      },
+      (geoErr) => {
+        setLocating(false);
+        setError("Location access was declined or unavailable.");
+      },
+      { timeout: 10000 }
+    );
+  };
+
   useEffect(() => {
-    handleSearch('Casablanca');
+    loadWeather('Casablanca');
+    loadInitialNews();
   }, []);
 
-  const currentThemeConfig = THEMES[theme];
-
-  // If Dark Mode is active, override the gradient with a dark gray/black background
-  const backgroundClass = isDarkMode 
-    ? 'bg-gray-950' 
-    : `bg-gradient-to-br ${currentThemeConfig.gradient}`;
+  const quickCities = [
+    'Casablanca',
+    'Rabat',
+    'Marrakech',
+    'Tangier',
+    'Fes',
+    'Agadir',
+    'Essaouira',
+    'Ifrane'
+  ];
 
   return (
-    <div className={`min-h-screen transition-colors duration-1000 ${backgroundClass} relative overflow-hidden`}>
-      
-      {/* Interactive Background */}
-      <WeatherBackground 
-        condition={weather?.current.condition_text || 'clear'} 
-        theme={theme} 
-      />
+    <div className={`min-h-screen transition-colors duration-500 relative ${
+      isDarkMode ? 'bg-[#0d1117] text-zinc-100' : 'bg-[#f4f5f7] text-zinc-900'
+    }`}>
+      {/* Subtle Atmospheric Backdrop with motion particles */}
+      <WeatherBackground condition={weather?.current.condition_text || 'Clear'} />
 
-      <div className="relative z-10 container mx-auto px-4 py-8 min-h-screen flex flex-col">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-12">
-          <div className="flex items-center gap-2">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col min-h-screen">
+        
+        {/* Clean Header Bar */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+          <div className="flex items-center justify-between">
             <motion.div 
-              whileHover={{ rotate: 360, scale: 1.1 }}
-              transition={{ duration: 0.7 }}
-              className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-lg flex items-center justify-center border border-white/30 shadow-lg cursor-pointer"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center gap-2.5 cursor-pointer select-none" 
+              onClick={() => loadWeather('Casablanca')}
             >
-               <span className="text-xl">🏔️</span>
+              <div className="w-8 h-8 rounded-lg bg-zinc-800/80 border border-zinc-700/60 flex items-center justify-center text-sky-400 shadow-sm">
+                <CloudSun className="w-5 h-5 text-sky-400 animate-pulse" />
+              </div>
+              <div>
+                <h1 className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 font-sans">
+                  THE weather
+                </h1>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-none">Meteorological Station</p>
+              </div>
             </motion.div>
-            <span className="text-2xl font-bold text-white tracking-tight hidden sm:block">Atlas Sky</span>
-          </div>
-          
-          <div className="flex-1 max-w-xl mx-4">
-             <SearchBar onSearch={handleSearch} isLoading={loading} />
+
+            {/* Mobile controls */}
+            <div className="flex md:hidden items-center gap-2">
+              <ThemeSwitcher />
+            </div>
           </div>
 
-          <ThemeSwitcher />
+          {/* Search bar */}
+          <div className="w-full md:max-w-md">
+            <SearchBar 
+              onSearch={loadWeather} 
+              onLocateMe={handleLocateMe}
+              isLoading={loading}
+              isLocating={locating}
+            />
+          </div>
+
+          {/* Desktop controls */}
+          <div className="hidden md:flex items-center gap-3">
+            <motion.button
+              whileHover={{ scale: 1.08, rotate: 180 }}
+              whileTap={{ scale: 0.92 }}
+              transition={{ duration: 0.35 }}
+              onClick={() => loadWeather(selectedCity)}
+              disabled={loading}
+              title="Refresh meteorological observation"
+              className="p-1.5 rounded-lg bg-white dark:bg-zinc-800/80 hover:bg-zinc-100 dark:hover:bg-zinc-700/80 border border-zinc-200 dark:border-zinc-700/60 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors disabled:opacity-50 shadow-sm"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-sky-500' : ''}`} />
+            </motion.button>
+            <ThemeSwitcher />
+          </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1">
+        {/* Quick Cities Pill Filter with Fluid Layout Animation */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 scrollbar-none">
+          {quickCities.map((cityName) => {
+            const isActive = selectedCity.toLowerCase() === cityName.toLowerCase();
+            return (
+              <button
+                key={cityName}
+                onClick={() => loadWeather(cityName)}
+                className={`relative px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap outline-none ${
+                  isActive
+                    ? 'text-zinc-900 dark:text-zinc-950 font-semibold'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 border border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-900/40'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeCityPill"
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                    className="absolute inset-0 bg-white dark:bg-zinc-100 rounded-full shadow-sm"
+                    style={{ zIndex: 0 }}
+                  />
+                )}
+                <span className="relative z-10">{cityName}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Live News Wire Ticker */}
+        <NewsTicker 
+          articles={tickerArticles} 
+          isLoading={newsLoading} 
+          onArticleClick={(art) => setActiveNewsModal(art)} 
+        />
+
+        {/* Main Meteorological & News Content Area */}
+        <main className="flex-1 space-y-6">
           <AnimatePresence mode="wait">
-             {loading && !weather ? (
-               <motion.div 
-                 key="loader"
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 exit={{ opacity: 0 }}
-                 className="flex flex-col items-center justify-center h-[50vh] text-white"
-               >
-                 <Loader2 className="w-12 h-12 animate-spin mb-4 text-cyan-300" />
-                 <p className="text-lg font-light tracking-wider animate-pulse">Reading atmospheric conditions...</p>
-               </motion.div>
-             ) : error ? (
-               <motion.div
-                 key="error"
-                 initial={{ opacity: 0, y: 20 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 className="flex flex-col items-center justify-center h-[50vh] text-white"
-               >
-                 <span className="text-6xl mb-4">🌪️</span>
-                 <p className="text-xl font-semibold mb-2">Oops!</p>
-                 <p className="text-white/60 mb-6">{error}</p>
-                 <button 
-                   onClick={() => handleSearch(city)}
-                   className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full transition-all"
-                 >
-                   Try Again
-                 </button>
-               </motion.div>
-             ) : weather ? (
-               <motion.div
-                 key="content"
-                 initial={{ opacity: 0 }}
-                 animate={{ opacity: 1 }}
-                 transition={{ duration: 0.5 }}
-                 className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-               >
-                  {/* Left Column: Current Weather & Hourly & Chart */}
-                  <div className="lg:col-span-2 space-y-6">
-                    <CurrentWeather data={weather} />
+            {loading && !weather ? (
+              <motion.div
+                key="loader"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center justify-center h-[50vh] text-zinc-400"
+              >
+                <Loader2 className="w-8 h-8 animate-spin text-sky-400 mb-3" />
+                <span className="text-sm font-medium">Fetching meteorological observation...</span>
+              </motion.div>
+            ) : error ? (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center p-8 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-center max-w-md mx-auto my-12"
+              >
+                <AlertCircle className="w-8 h-8 text-rose-400 mb-3" />
+                <h2 className="text-base font-semibold text-zinc-100 mb-1">Weather Data Unavailable</h2>
+                <p className="text-xs text-zinc-400 mb-4">{error}</p>
+                <button
+                  onClick={() => loadWeather('Casablanca')}
+                  className="px-4 py-2 text-xs font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 rounded-lg transition-colors"
+                >
+                  Reset to Casablanca
+                </button>
+              </motion.div>
+            ) : weather ? (
+              <motion.div
+                key="dashboard"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                {/* 1. Hero Weather Card */}
+                <CurrentWeather data={weather} />
+
+                {/* 2. Detailed Meteorological Metrics Bento */}
+                <WeatherStats data={weather} />
+
+                {/* 3. Secondary Layout: Left 24h & Chart, Right 7-Day Outlook */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  <div className="lg:col-span-2 space-y-5">
                     <HourlyForecast data={weather.hourly} />
                     <ForecastChart data={weather.forecast} />
                   </div>
 
-                  {/* Right Column: Forecast List */}
                   <div className="lg:col-span-1">
-                     <div className={`
-                        border rounded-3xl p-6 h-full backdrop-blur-md transition-colors duration-500
-                        ${isDarkMode ? 'bg-gray-900/80 border-white/10' : 'bg-white/5 border-white/10'}
-                     `}>
-                        <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                          <span className="text-cyan-300">📅</span> 4-Day Forecast
-                        </h2>
-                        <ForecastList forecast={weather.forecast} />
-                     </div>
+                    <ForecastList forecast={weather.forecast} />
                   </div>
-               </motion.div>
-             ) : null}
+                </div>
+
+                {/* 4. Meteorological & Global Dispatches News Section */}
+                <WeatherNews 
+                  activeModalArticle={activeNewsModal} 
+                  onSelectArticle={setActiveNewsModal} 
+                />
+              </motion.div>
+            ) : null}
           </AnimatePresence>
         </main>
 
-        <footer className="mt-12 text-center text-white/30 text-sm py-4">
-          <p>© {new Date().getFullYear()} Atlas Sky. Made by a human on earth.</p>
+        {/* Clean, Understated Footer */}
+        <footer className="mt-12 pt-6 border-t border-zinc-200 dark:border-zinc-800/60 text-center text-xs text-zinc-500 dark:text-zinc-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-zinc-800 dark:text-zinc-200">THE weather</span>
+            <span>•</span>
+            <span>Real-time Meteorological Station & News Feed</span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-zinc-400">
+            <span>Currents Wire Syndicated</span>
+            <span>•</span>
+            <span>Made by a human on earth</span>
+          </div>
         </footer>
       </div>
     </div>
@@ -149,15 +285,10 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  const [theme, setTheme] = useState<AppTheme>(AppTheme.OCEAN);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-
-  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
-
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, isDarkMode, toggleDarkMode }}>
+    <ThemeProvider>
       <AppContent />
-    </ThemeContext.Provider>
+    </ThemeProvider>
   );
 };
 

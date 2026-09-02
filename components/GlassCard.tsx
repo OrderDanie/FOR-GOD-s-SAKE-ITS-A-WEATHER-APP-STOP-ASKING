@@ -17,38 +17,24 @@ export const GlassCard: React.FC<GlassCardProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
 
-  const intensityClasses = {
-    low: 'bg-white/5 backdrop-blur-sm border-white/10',
-    medium: 'bg-white/10 backdrop-blur-md border-white/20',
-    high: 'bg-white/20 backdrop-blur-xl border-white/30',
-  };
-
-  // Dark mode uses darker backgrounds with higher opacity for better contrast
-  const darkIntensityClasses = {
-    low: 'bg-gray-900/60 backdrop-blur-md border-white/5',
-    medium: 'bg-gray-900/80 backdrop-blur-xl border-white/10',
-    high: 'bg-black/80 backdrop-blur-2xl border-white/15',
-  };
-
-  const selectedClasses = isDarkMode ? darkIntensityClasses[intensity] : intensityClasses[intensity];
+  const baseClasses = isDarkMode
+    ? 'bg-zinc-900/80 border border-zinc-800/80 text-zinc-100 backdrop-blur-md shadow-sm'
+    : 'bg-white border border-zinc-200/90 text-zinc-900 shadow-sm';
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -2, transition: { duration: 0.25, ease: "easeOut" } }}
       className={twMerge(
-        'relative rounded-3xl border shadow-xl overflow-hidden group',
-        selectedClasses,
+        'relative rounded-2xl transition-colors duration-300 overflow-hidden',
+        baseClasses,
         className
       )}
       {...props}
     >
-      {/* Shine effect on hover (subtler in dark mode) */}
-      <div className={`absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent ${isDarkMode ? 'via-white/5' : 'via-white/10'} to-transparent pointer-events-none`} />
-      
       {children}
     </motion.div>
   );
